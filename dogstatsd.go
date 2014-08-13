@@ -94,8 +94,8 @@ func (c *Client) Histogram(name string, value float64, tags []string, rate float
 	return c.send(name, stat, tags, rate)
 }
 
-// Duration track the statistical distribution of a set of durations
-func (c *Client) Duration(name string, value float64, tags []string, rate float64) error {
+// Timers track the statistical distribution of a set of durations
+func (c *Client) Timer(name string, value float64, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%f|ms", value)
 	return c.send(name, stat, tags, rate)
 }
