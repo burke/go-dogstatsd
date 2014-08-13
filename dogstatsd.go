@@ -29,6 +29,7 @@ import (
 	"strings"
 )
 
+// Client holds onto a connection and the other context necessary for every stasd packet.
 type Client struct {
 	conn net.Conn
 	// Namespace to prepend to all statsd calls
@@ -93,31 +94,31 @@ func (c *Client) Event(title string, text string, tags []string) error {
 	return err
 }
 
-// Gauges measure the value of a metric at a particular time
+// Gauge measures the value of a metric at a particular time
 func (c *Client) Gauge(name string, value float64, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%f|g", value)
 	return c.send(name, stat, tags, rate)
 }
 
-// Counters track how many times something happened per second
+// Count tracks how many times something happened per second
 func (c *Client) Count(name string, value int64, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%d|c", value)
 	return c.send(name, stat, tags, rate)
 }
 
-// Histograms track the statistical distribution of a set of values
+// Histogram tracks the statistical distribution of a set of values
 func (c *Client) Histogram(name string, value float64, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%f|h", value)
 	return c.send(name, stat, tags, rate)
 }
 
-// Timers track the statistical distribution of a set of durations
+// Timer tracks the statistical distribution of a set of durations
 func (c *Client) Timer(name string, value float64, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%f|ms", value)
 	return c.send(name, stat, tags, rate)
 }
 
-// Sets count the number of unique elements in a group
+// Set counts the number of unique elements in a group
 func (c *Client) Set(name string, value string, tags []string, rate float64) error {
 	stat := fmt.Sprintf("%s|s", value)
 	return c.send(name, stat, tags, rate)
