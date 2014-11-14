@@ -30,15 +30,15 @@ import (
 )
 
 var (
-	MetricSeparator = []byte{':'}
-	RateSeparator   = []byte("|@")
-	TagSeparator    = []byte("|#")
-	GaugeSpec       = []byte("|g")
-	CountSpec       = []byte("|c")
-	HistogramSpec   = []byte("|h")
-	TimerSpec       = []byte("|ms")
-	SetSpec         = []byte("|s")
-	Comma           = []byte{','}
+	metricSeparator = []byte{':'}
+	rateSeparator   = []byte("|@")
+	tagSeparator    = []byte("|#")
+	gaugeSpec       = []byte("|g")
+	countSpec       = []byte("|c")
+	histogramSpec   = []byte("|h")
+	timerSpec       = []byte("|ms")
+	setSpec         = []byte("|s")
+	comma           = []byte{','}
 )
 
 // Client holds onto a connection and the other context necessary for every stasd packet.
@@ -74,14 +74,9 @@ func (c *Client) send(b *bytes.Buffer, spec []byte, tags []string, rate float64)
 
 	if rate < 1 {
 		if rand.Float64() < rate {
-			if _, err := b.Write(RateSeparator); err != nil {
+			if _, err := b.Write(rateSeparator); err != nil {
 				return err
 			}
-			/*
-				bs := b.Bytes()
-				bs = strconv.AppendFloat(bs, rate, 'f', -1, 64)
-				b = bytes.NewBuffer(bs)
-			*/
 			b.WriteString(strconv.FormatFloat(rate, 'f', -1, 64))
 		} else {
 			return nil
@@ -90,7 +85,7 @@ func (c *Client) send(b *bytes.Buffer, spec []byte, tags []string, rate float64)
 
 	tags = append(c.Tags, tags...)
 	if len(tags) > 0 {
-		if _, err := b.Write(TagSeparator); err != nil {
+		if _, err := b.Write(tagSeparator); err != nil {
 			return err
 		}
 		l := len(tags) - 1
@@ -99,7 +94,7 @@ func (c *Client) send(b *bytes.Buffer, spec []byte, tags []string, rate float64)
 				return err
 			}
 			if i != l {
-				if _, err := b.Write(Comma); err != nil {
+				if _, err := b.Write(comma); err != nil {
 					return err
 				}
 			}
@@ -134,7 +129,7 @@ func (c *Client) start(b *bytes.Buffer, name string) error {
 	if _, err = b.WriteString(name); err != nil {
 		return err
 	}
-	if _, err = b.Write(MetricSeparator); err != nil {
+	if _, err = b.Write(metricSeparator); err != nil {
 		return err
 	}
 	return nil
@@ -149,7 +144,7 @@ func (c *Client) Gauge(name string, value float64, tags []string, rate float64) 
 	if _, err := b.WriteString(strconv.FormatFloat(value, 'f', -1, 64)); err != nil {
 		return err
 	}
-	return c.send(&b, GaugeSpec, tags, rate)
+	return c.send(&b, gaugeSpec, tags, rate)
 }
 
 // Count tracks how many times something happened per second
@@ -161,7 +156,7 @@ func (c *Client) Count(name string, value int64, tags []string, rate float64) er
 	if _, err := b.WriteString(strconv.FormatInt(value, 10)); err != nil {
 		return err
 	}
-	return c.send(&b, CountSpec, tags, rate)
+	return c.send(&b, countSpec, tags, rate)
 }
 
 // Histogram tracks the statistical distribution of a set of values
@@ -173,7 +168,7 @@ func (c *Client) Histogram(name string, value float64, tags []string, rate float
 	if _, err := b.WriteString(strconv.FormatFloat(value, 'f', -1, 64)); err != nil {
 		return err
 	}
-	return c.send(&b, HistogramSpec, tags, rate)
+	return c.send(&b, histogramSpec, tags, rate)
 }
 
 // Timer tracks the statistical distribution of a set of durations
@@ -185,7 +180,7 @@ func (c *Client) Timer(name string, value float64, tags []string, rate float64) 
 	if _, err := b.WriteString(strconv.FormatFloat(value, 'f', -1, 64)); err != nil {
 		return err
 	}
-	return c.send(&b, TimerSpec, tags, rate)
+	return c.send(&b, timerSpec, tags, rate)
 }
 
 // Set counts the number of unique elements in a group
@@ -197,5 +192,5 @@ func (c *Client) Set(name string, value string, tags []string, rate float64) err
 	if _, err := b.WriteString(value); err != nil {
 		return err
 	}
-	return c.send(&b, SetSpec, tags, rate)
+	return c.send(&b, setSpec, tags, rate)
 }
